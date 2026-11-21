@@ -1,0 +1,39 @@
+﻿repos:
+  # Базовые проверки файлов (лишние пробелы, пустая строка в конце, валидность YAML/TOML)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+
+  # Локальные хуки из вашего uv-окружения (.venv)
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+
+      - id: mypy
+        name: mypy type check
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false # проверять весь проект целиком для корректного анализа связей
+
+      - id: bandit
+        name: bandit security check
+        entry: uv run bandit -c pyproject.toml -r src/ # укажите вашу папку с кодом (src или app)
+        language: system
+        types: [python]
+        pass_filenames: false

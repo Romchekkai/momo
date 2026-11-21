@@ -1,0 +1,80 @@
+[project]
+name = "momo"
+dynamic = ["version"]  # вместо жесткого version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "romchek-kai", email = "kaidenkoroman@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi==0.165.0",
+    "opentelemetry-api>=1.45.2",
+    "opentelemetry-exporter-otlp>=1.45.2",
+    "opentelemetry-sdk>=1.45.2",
+    "psycopg[binary]==3.3.9",
+    "pydantic-settings>=2.16.3",
+    "sqlalchemy>=2.1.9",
+    "structlog>=26.1.0",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+momo = "momo:main"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/momo"]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.9.4",
+    "mypy>=2.4.1",
+    "pre-commit>=4.7.0",
+    "ruff>=0.17.6",
+    "testcontainers>=4.15.0",
+]
+# ==========================================
+# RUFF (линтер + форматтер + замена flake8/isort)
+# ==========================================
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+exclude = [".venv", "migrations"]
+
+[tool.ruff.lint]
+# E/W - стиль (pycodestyle), F - логические ошибки (pyflakes), I - сортировка импортов (isort)
+# B - частые баги (bugbear), UP - современный синтаксис Python, ASYNC - ошибки в async/await
+select = ["E", "W", "F", "I", "B", "UP", "ASYNC"]
+ignore = [
+    "B008", # разрешает вызов функций в аргументах по умолчанию (нужно для Depends() в FastAPI)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ==========================================
+# MYPY (строгая проверка типов)
+# ==========================================
+[tool.mypy]
+python_version = "3.14" # укажите вашу версию: 3.12 или 3.13
+strict = true
+ignore_missing_imports = true
+files = ["src"]
+exclude = ["migrations/"]
+# Подключаем плагины для корректной проверки моделей Pydantic и SQLAlchemy 2.0
+plugins = ["pydantic.mypy"]
+
+# ==========================================
+# BANDIT (поиск уязвимостей безопасности)
+# ==========================================
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "migrations"]
+skips = ["B101"] # разрешаем использование assert (если вдруг пригодится вне тестов)
